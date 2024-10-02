@@ -26,11 +26,7 @@ jobs:
 
     - name: Build images
       run: |
-        nix-channel --update
-        nix-channel --list
-        nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
-        nix-channel --update
-        nix-env -i nixpkgs.nixos-generators nixpkgs.qemu
+        nix-env -i nixos-generators qemu -f '<nixpkgs>'
         sudo .github/workflows/build.sh
 
     - name: Upload artifacts
