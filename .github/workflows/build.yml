@@ -49,7 +49,7 @@ jobs:
         qemu-system-x86_64 \
           -m 4096M \
           -kernel vmlinuz \
-          -append "console=ttyS0 root=/dev/sda1 rw" \
+          -append "console=ttyS0 rw" \
           -nographic \
           -no-reboot \
           -drive file=./disk.img,format=raw,if=virtio
