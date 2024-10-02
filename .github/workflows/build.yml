@@ -26,7 +26,8 @@ jobs:
 
     - name: Build images
       run: |
-        nix-shell -p nixos-generators qemu --run "sudo .github/workflows/build.sh"
+        nix-env -i nixos-generators qemu
+        sudo .github/workflows/build.sh
 
     - name: Upload artifacts
       run: |
