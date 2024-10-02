@@ -22,7 +22,7 @@ jobs:
 
     - name: Install packages
       run: |
-        nix-env -iA nixpkgs.qemu nixpkgs.nixos-generators
+        nix-env -iA qemu nixos-generators
         ls -la /boot/
 
     - name: Build images
