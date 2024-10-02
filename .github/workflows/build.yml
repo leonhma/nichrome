@@ -42,7 +42,6 @@ jobs:
         # Boot the VM
         sudo cp -l /boot/vmlinuz .
         sudo chmod 644 vmlinuz
-        ls -la
         qemu-system-x86_64 \
           -m 4096M \
           -kernel vmlinuz \
@@ -50,6 +49,7 @@ jobs:
           -nographic \
           -no-reboot \
           -drive file=./disk.img,format=raw,if=virtio
+          -net none
 
         ld=$(losetup -f)
         sudo losetup $ld disk.img
