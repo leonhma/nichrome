@@ -43,9 +43,10 @@ jobs:
         sudo losetup -d $ld
 
         # Boot the VM
-        sudo qemu-system-x86_64 \
+        sudo cp /boot/vmlinuz .
+        qemu-x86_64 \
           -m 1024 \
-          -kernel /boot/vmlinuz \
+          -kernel vmlinuz \
           -append "console=ttyS0 root=/dev/sda1 rw" \
           -nographic \
           -no-reboot \
