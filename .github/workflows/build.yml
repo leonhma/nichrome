@@ -26,6 +26,7 @@ jobs:
 
     - name: Build images
       run: |
+        nix-channel --update
         nix-env -i nixos-generators qemu
         sudo .github/workflows/build.sh
 
