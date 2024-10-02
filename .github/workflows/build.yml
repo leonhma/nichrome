@@ -15,7 +15,7 @@ jobs:
 
     - name: Install Nix
       run: |
-        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
 
     - name: debug
       run: |
@@ -23,7 +23,7 @@ jobs:
 
     - name: Build images
       run: |
-        nix-env -iA nixos-generators qemu -f '<nixpkgs>'
+        nix-env -i nixos-generators qemu -f '<nixpkgs>'
         sudo .github/workflows/build.sh
 
     - name: Upload artifacts
