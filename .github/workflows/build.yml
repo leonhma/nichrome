@@ -45,7 +45,7 @@ jobs:
         qemu-system-x86_64 \
           -m 4096M \
           -kernel vmlinuz \
-          -append "console=tty0 root=/dev/vda rw raid=noautodetect panic=-1" \
+          -append "console=ttyS0 root=/dev/vda rw raid=noautodetect panic=-1" \
           -nographic \
           -no-reboot \
           -drive file=./disk.img,format=raw,if=virtio
