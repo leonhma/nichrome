@@ -26,7 +26,7 @@ jobs:
 
     - name: Build images
       run: |
-        nix-env -i nixos-generators qemu -f '<nixpkgs>'
+        nix-env -iA nixos-generators qemu -f '<nixpkgs>'
         sudo .github/workflows/build.sh
 
     - name: Upload artifacts
