@@ -43,7 +43,7 @@ jobs:
         sudo losetup -d $ld
 
         # Boot the VM
-        sudo cp /boot/vmlinuz .
+        sudo cp -l /boot/vmlinuz .
         qemu-system-x86_64 \
           -m 4096M \
           -kernel vmlinuz \
