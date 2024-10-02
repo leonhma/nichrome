@@ -39,47 +39,51 @@
           lxcImage = pkgs.stdenv.mkDerivation {
             name = "nichrome-${system}";
             dontUnpack = true;
-            buildInputs = with pkgs; [ qemu libguestfs-with-appliance ];
+            buildInputs = with pkgs; [ qemu util-linux e2fsprogs ];
             buildPhase = ''
               set -e
 
               # Create the raw image
-              qemu-img create -f raw disk.img 2G
+              dd if=/dev/null of=disk.img bs=16M seek=256
+              mkfs.ext4 disk.img
 
-              # Prepare contents using guestfish
-              guestfish --rw -a disk.img <<EOF
-              run
-              part-init /dev/sda mbr
-              part-add /dev/sda p 1 2048 -1
-              mkfs ext4 /dev/sda1
-              mount /dev/sda1 /
-              upload ${basefs}/tarball/nixos-system-${system}.tar.xz /basefs.tar.xz
-              tar-in /basefs.tar.xz / compress:xz
-              umount /
-              EOF
+              # Populate the image rootfs
+              mkdir rootfs
+              ld=$(sudo losetup -f)
+              sudo losetup $ld disk.img
+              sudo mount $ld rootfs
+
+              ls rootfs
+              tar xJf ${basefs}/tarball/nixos-system-${system} -C rootfs
+              echo "------"
+              ls rootfs
+
+              sudo umount $ld
+              sudo losetup -d $ld
                 
               # Boot the VM
               qemu-system-x86_64 \
-              -m 1024 \
+              -m 1024 \S
               -kernel ${pkgs.linux}/bzImage \
               -append "console=ttyS0 root=/dev/sda1 rw" \
               -nographic \
               -no-reboot \
               -drive file=./disk.img,format=raw,if=virtio
 
-              guestfish --ro -a disk.img <<EOF
-              run
-              mount /dev/sda1 /
-              copy-out / booted
-              EOF
+              ld=$(losetup -f)
+              sudo losetup $ld disk.img
+              sudo mount $ld rootfs
     
               # Create /etc/gshadow if it doesn't exist
-              touch booted/etc/gshadow
+              touch rootfs/etc/gshadow
     
               # Export the modified rootfs
-              ${pkgs.gnutar}/bin/tar -cJf nichrome-${system}.tar.xz -C booted .
+              ${pkgs.gnutar}/bin/tar -cJf nichrome-${system}.tar.xz -C rootfs .
     
-              rm -rf mnt disk.img
+              sudo umount $ld
+              sudo losetup -d $ld
+
+              rm -rf rootfs disk.img
             '';
             installPhase = ''
               mv nichrome-${system}.tar.xz $out

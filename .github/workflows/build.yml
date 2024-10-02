@@ -1,0 +1,77 @@
+name: Build Nix Flake Packages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: x86_64-linux
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v22
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+
+    - name: Install packages
+      run: |
+        nix-env -iA nixpkgs.qemu nixpkgs.nixos-generators
+        ls -la /boot/
+
+    - name: Build images
+      run: |
+        set -e
+
+        # Create the raw image
+        dd if=/dev/null of=disk.img bs=16M seek=256
+        mkfs.ext4 disk.img
+
+        # Populate the image rootfs
+        mkdir rootfs
+        ld=$(sudo losetup -f)
+        sudo losetup $ld disk.img
+        sudo mount $ld rootfs
+
+        ls rootfs
+        tar xJf ${basefs}/tarball/nixos-system-${system} -C rootfs
+        echo "------"
+        ls rootfs
+
+        sudo umount $ld
+        sudo losetup -d $ld
+                
+        # Boot the VM
+        qemu-system-x86_64 \
+          -m 1024 \S
+          -kernel ${pkgs.linux}/bzImage \
+          -append "console=ttyS0 root=/dev/sda1 rw" \
+          -nographic \
+          -no-reboot \
+          -drive file=./disk.img,format=raw,if=virtio
+
+        ld=$(losetup -f)
+        sudo losetup $ld disk.img
+        sudo mount $ld rootfs
+    
+        # Create /etc/gshadow if it doesn't exist
+        touch rootfs/etc/gshadow
+    
+        # Export the modified rootfs
+        ${pkgs.gnutar}/bin/tar -cJf nichrome-${system}.tar.xz -C rootfs .
+    
+        sudo umount $ld
+        sudo losetup -d $ld
+
+        rm -rf rootfs disk.img
+
+    - name: Upload artifacts
+      run: |
+        ls -l result*/
