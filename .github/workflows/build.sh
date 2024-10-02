@@ -22,7 +22,7 @@ sudo losetup -d $ld
 # Boot the VM
 qemu-system-x86_64 \
   -m 1024 \
-  -kernel arch/x86_64/boot/bzImage \
+  -kernel /boot/vmlinuz \
   -append "console=ttyS0 root=/dev/sda1 rw" \
   -nographic \
   -no-reboot \
@@ -36,7 +36,7 @@ sudo mount $ld rootfs
 touch rootfs/etc/gshadow
 
 # Export the modified rootfs
-tar -cJf nichrome-x86.tar.xz -C rootfs .
+tar -cJf nichrome-x64.tar.xz -C rootfs .
 
 sudo umount $ld
 sudo losetup -d $ld
