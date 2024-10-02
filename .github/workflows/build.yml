@@ -45,7 +45,7 @@ jobs:
         # Boot the VM
         sudo cp /boot/vmlinuz .
         qemu-x86_64 \
-          -m 1024 \
+          -m 4096M \
           -kernel vmlinuz \
           -append "console=ttyS0 root=/dev/sda1 rw" \
           -nographic \
